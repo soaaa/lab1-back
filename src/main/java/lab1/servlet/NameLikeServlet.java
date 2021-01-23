@@ -25,7 +25,7 @@ public class NameLikeServlet extends HttpServlet {
         }
         List<Vehicle> result = EntityManagerProvider.provide()
                 .createNamedQuery("nameLike", Vehicle.class)
-                .setParameter("value", "%" + value + "%")
+                .setParameter("value", value)
                 .getResultList();
         resp.getWriter().write(gson.toJson(result));
     }

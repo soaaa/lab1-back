@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
                 name = "nameLike",
                 query = "SELECT v " +
                         "FROM Vehicle v " +
-                        "WHERE v.name like :value"
+                        "WHERE v.name like CONCAT('%', CONCAT(:value, '%'))"
         ),
         @NamedQuery(
                 name = "enginePowerToCount",

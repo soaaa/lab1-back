@@ -31,12 +31,20 @@ public class CrudServlet extends HttpServlet {
         COLUMN_SET.add("fuel_type");
     }
 
+    public static final String GET_BY_ID_URI_REGEX = "/vehicle/.+";
+
     private final Gson gson = new Gson();
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Map<String, String[]> paramMap = req.getParameterMap();
+    private void doFindById(long id, HttpServletResponse resp) throws IOException {
+        Vehicle vehicle = EntityManagerProvider.provide().find(Vehicle.class, id);
+        if (vehicle != null) {
+            resp.getWriter().write(gson.toJson(vehicle));
+        } else {
+            ServletHelper.setNotFound(resp, "Vehicle with id " + id + " not found");
+        }
+    }
 
+    private void doFilterCollection(Map<String, String[]> paramMap, HttpServletResponse resp) throws IOException {
         EntityManager entityManager = EntityManagerProvider.provide();
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
@@ -114,7 +122,7 @@ public class CrudServlet extends HttpServlet {
             String value = paramMap.get("page")[0];
             try {
                 page = Integer.parseInt(value);
-                if (page < 0) {
+                if (page < 1) {
                     ServletHelper.setBadRequest(resp, "Invalid page: " + page);
                     return;
                 }
@@ -126,10 +134,27 @@ public class CrudServlet extends HttpServlet {
 
         TypedQuery<Vehicle> typedQuery = entityManager.createQuery(query);
         if (pageSize != null) {
-            typedQuery.setFirstResult(page * pageSize).setMaxResults(pageSize);
+            typedQuery.setFirstResult((page - 1) * pageSize).setMaxResults(pageSize);
         }
         List<Vehicle> result = typedQuery.getResultList();
         resp.getWriter().write(gson.toJson(result));
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String uri = req.getRequestURI();
+        if (uri.matches(GET_BY_ID_URI_REGEX)) {
+            String idValue = uri.split("/")[2];
+            long id;
+            try {
+                id = Long.parseLong(idValue);
+                doFindById(id, resp);
+            } catch (NumberFormatException e) {
+                ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
+            }
+        } else {
+            doFilterCollection(req.getParameterMap(), resp);
+        }
     }
 
     @Override
@@ -181,13 +206,14 @@ public class CrudServlet extends HttpServlet {
             vehicle = new ValidatedVehicle(vehicle).getVehicle();
         } catch (ValidationException e) {
             ServletHelper.setBadRequest(resp, e.getMessage());
+            return;
         }
 
         EntityManager entityManager = EntityManagerProvider.provide();
         entityManager.getTransaction().begin();
         Vehicle storedVehicle = entityManager.find(Vehicle.class, vehicle.getId());
         if (storedVehicle == null) {
-            ServletHelper.setBadRequest(resp, "Vehicle with id " + vehicle.getId() + " not found");
+            ServletHelper.setNotFound(resp, "Vehicle with id " + vehicle.getId() + " not found");
             entityManager.getTransaction().rollback();
             return;
         }
@@ -202,7 +228,7 @@ public class CrudServlet extends HttpServlet {
         try {
             id = Long.parseLong(idValue);
         } catch (NumberFormatException e) {
-            ServletHelper.setBadRequest(resp, "Request body syntax error");
+            ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
             return;
         }
 
@@ -210,7 +236,7 @@ public class CrudServlet extends HttpServlet {
         entityManager.getTransaction().begin();
         Vehicle storedVehicle = entityManager.find(Vehicle.class, id);
         if (storedVehicle == null) {
-            ServletHelper.setBadRequest(resp, "Vehicle with id " + id + " not found");
+            ServletHelper.setNotFound(resp, "Vehicle with id " + id + " not found");
             entityManager.getTransaction().rollback();
             return;
         }

@@ -22,8 +22,16 @@ public final class ServletHelper {
         return new String(buf);
     }
 
-    public static void setBadRequest(HttpServletResponse resp, String message) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    private static void setResponse(HttpServletResponse resp, int status, String message) throws IOException {
+        resp.setStatus(status);
         resp.getWriter().write(message);
+    }
+
+    public static void setBadRequest(HttpServletResponse resp, String message) throws IOException {
+        setResponse(resp, HttpServletResponse.SC_BAD_REQUEST, message);
+    }
+
+    public static void setNotFound(HttpServletResponse resp, String message) throws IOException {
+        setResponse(resp, HttpServletResponse.SC_NOT_FOUND, message);
     }
 }
