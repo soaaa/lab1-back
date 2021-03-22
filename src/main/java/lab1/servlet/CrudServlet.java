@@ -212,11 +212,20 @@ public class CrudServlet extends HttpServlet {
             return;
         }
 
+        String idValue = req.getParameter("id");
+        long id;
+        try {
+            id = Long.parseLong(idValue);
+        } catch (NumberFormatException e) {
+            ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
+            return;
+        }
+
         EntityManager entityManager = EntityManagerProvider.provide();
         entityManager.getTransaction().begin();
-        Vehicle storedVehicle = entityManager.find(Vehicle.class, vehicle.getId());
+        Vehicle storedVehicle = entityManager.find(Vehicle.class, id);
         if (storedVehicle == null) {
-            ServletHelper.setNotFound(resp, "Vehicle with id " + vehicle.getId() + " not found");
+            ServletHelper.setNotFound(resp, "Vehicle with id " + id + " not found");
             entityManager.getTransaction().rollback();
             return;
         }
