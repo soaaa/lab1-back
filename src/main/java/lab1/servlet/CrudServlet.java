@@ -3,12 +3,14 @@ package lab1.servlet;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import lab1.*;
-import lab1.model.*;
+import lab1.model.FuelType;
+import lab1.model.ValidatedVehicle;
+import lab1.model.Vehicle;
+import lab1.model.VehicleType;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -194,7 +196,7 @@ public class CrudServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Vehicle vehicle;
         try {
             vehicle = gson.fromJson(ServletHelper.getBody(req), Vehicle.class);
@@ -223,7 +225,7 @@ public class CrudServlet extends HttpServlet {
     }
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String idValue = req.getParameter("id");
         long id;
         try {
