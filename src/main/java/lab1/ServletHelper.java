@@ -11,15 +11,15 @@ public final class ServletHelper {
     }
 
     public static String getBody(HttpServletRequest req) throws IOException {
-        int contentLength = req.getContentLength();
-        char[] buf = new char[contentLength];
+        StringBuilder stringBuilder = new StringBuilder();
+        char[] buf = new char[128];
         Reader reader = req.getReader();
-        int bytesRead = 0;
-        do {
-            bytesRead += reader.read(buf, bytesRead, contentLength - bytesRead);
-        } while (bytesRead < contentLength);
+        int bytesRead;
+        while ((bytesRead = reader.read(buf)) != -1) {
+            stringBuilder.append(buf, 0, bytesRead);
+        }
         reader.close();
-        return new String(buf);
+        return stringBuilder.toString();
     }
 
     private static void setResponse(HttpServletResponse resp, int status, String message) throws IOException {
