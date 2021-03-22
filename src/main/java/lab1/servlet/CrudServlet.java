@@ -63,7 +63,8 @@ public class CrudServlet extends HttpServlet {
                     .addEnumFilter(FuelType.values(), "fuel_type")
                     .build();
         } catch (InvalidFilterException e) {
-            ServletHelper.setBadRequest(resp, e.getMessage());
+            ServletHelper.setBadRequest(resp, "Invalid '" + e.getFilteredColumn()
+                    + "' filter value : " + e.getInvalidFilterValue());
             return;
         }
         query.where(filter);
