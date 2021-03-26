@@ -1,5 +1,7 @@
 package lab1;
 
+import com.google.gson.Gson;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -33,5 +35,11 @@ public final class ServletHelper {
 
     public static void setNotFound(HttpServletResponse resp, String message) throws IOException {
         setResponse(resp, HttpServletResponse.SC_NOT_FOUND, message);
+    }
+
+    public static void setResult(HttpServletResponse resp, Object object, Gson gson) throws IOException {
+        resp.setContentType("text/json; charset=UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+        resp.getWriter().write(gson.toJson(object));
     }
 }
