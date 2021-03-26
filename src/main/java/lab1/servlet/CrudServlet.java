@@ -40,7 +40,7 @@ public class CrudServlet extends HttpServlet {
     private void doFindById(long id, HttpServletResponse resp) throws IOException {
         Vehicle vehicle = EntityManagerProvider.provide().find(Vehicle.class, id);
         if (vehicle != null) {
-            resp.getWriter().write(gson.toJson(vehicle));
+            ServletHelper.setResult(resp, vehicle, gson);
         } else {
             ServletHelper.setNotFound(resp, "Vehicle with id " + id + " not found");
         }
@@ -140,7 +140,7 @@ public class CrudServlet extends HttpServlet {
             typedQuery.setFirstResult((page - 1) * pageSize).setMaxResults(pageSize);
         }
         List<Vehicle> result = typedQuery.getResultList();
-        resp.getWriter().write(gson.toJson(result));
+        ServletHelper.setResult(resp, result, gson);
     }
 
     @Override
