@@ -206,7 +206,6 @@ public class CrudServlet extends HttpServlet {
         long id;
         try {
             id = Long.parseLong(idValue);
-            doFindById(id, resp);
         } catch (NumberFormatException e) {
             ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
             return;
@@ -250,7 +249,6 @@ public class CrudServlet extends HttpServlet {
         long id;
         try {
             id = Long.parseLong(idValue);
-            doFindById(id, resp);
         } catch (NumberFormatException e) {
             ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
             return;
