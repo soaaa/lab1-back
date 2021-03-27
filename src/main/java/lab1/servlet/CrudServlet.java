@@ -197,6 +197,21 @@ public class CrudServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String uri = req.getRequestURI();
+        if (!uri.matches(BY_ID_URI_REGEX)) {
+            ServletHelper.setBadRequest(resp, "Vehicle id is not specified");
+            return;
+        }
+        String idValue = uri.split("/")[2];
+        long id;
+        try {
+            id = Long.parseLong(idValue);
+            doFindById(id, resp);
+        } catch (NumberFormatException e) {
+            ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
+            return;
+        }
+
         Vehicle vehicle;
         try {
             vehicle = gson.fromJson(ServletHelper.getBody(req), Vehicle.class);
@@ -209,15 +224,6 @@ public class CrudServlet extends HttpServlet {
             vehicle = new ValidatedVehicle(vehicle).getVehicle();
         } catch (ValidationException e) {
             ServletHelper.setBadRequest(resp, e.getMessage());
-            return;
-        }
-
-        String idValue = req.getParameter("id");
-        long id;
-        try {
-            id = Long.parseLong(idValue);
-        } catch (NumberFormatException e) {
-            ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
             return;
         }
 
@@ -235,10 +241,16 @@ public class CrudServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String idValue = req.getParameter("id");
+        String uri = req.getRequestURI();
+        if (!uri.matches(BY_ID_URI_REGEX)) {
+            ServletHelper.setBadRequest(resp, "Vehicle id is not specified");
+            return;
+        }
+        String idValue = uri.split("/")[2];
         long id;
         try {
             id = Long.parseLong(idValue);
+            doFindById(id, resp);
         } catch (NumberFormatException e) {
             ServletHelper.setBadRequest(resp, "Invalid id: " + idValue);
             return;
