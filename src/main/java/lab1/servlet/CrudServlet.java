@@ -33,7 +33,7 @@ public class CrudServlet extends HttpServlet {
         COLUMN_SET.add("fuel_type");
     }
 
-    public static final String GET_BY_ID_URI_REGEX = "/vehicle/.+";
+    public static final String BY_ID_URI_REGEX = "/vehicle/.+";
 
     private final Gson gson = new Gson();
 
@@ -146,7 +146,7 @@ public class CrudServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String uri = req.getRequestURI();
-        if (uri.matches(GET_BY_ID_URI_REGEX)) {
+        if (uri.matches(BY_ID_URI_REGEX)) {
             String idValue = uri.split("/")[2];
             long id;
             try {
