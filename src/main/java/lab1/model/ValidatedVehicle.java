@@ -6,7 +6,11 @@ public class ValidatedVehicle {
 
     private final Vehicle vehicle;
 
-    public ValidatedVehicle(Vehicle vehicle) throws ValidationException {
+    public ValidatedVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
+    private void validate() throws ValidationException {
         if (vehicle.getName() == null || vehicle.getName().isEmpty()) {
             throw new ValidationException("Invalid name: '" + vehicle.getName() + "'");
         }
@@ -22,18 +26,14 @@ public class ValidatedVehicle {
         if (vehicle.getFuelType() == null) {
             throw new ValidationException("Invalid fuel type: " + vehicle.getFuelType());
         }
-        validateCoordinates(vehicle.getCoordinates());
-
-        this.vehicle = vehicle;
-    }
-
-    private void validateCoordinates(Coordinates coordinates) throws ValidationException {
+        Coordinates coordinates = vehicle.getCoordinates();
         if (coordinates == null || coordinates.getY() <= -619) {
             throw new ValidationException("Invalid coordinates: " + coordinates);
         }
     }
 
-    public Vehicle getVehicle() {
+    public Vehicle getValidatedVehicle() throws ValidationException {
+        validate();
         return vehicle;
     }
 }
