@@ -2,12 +2,16 @@ package lab1.service;
 
 import lab1.ValidationException;
 import lab1.dao.VehicleDao;
-import lab1.model.ValidatedVehicle;
+import lab1.dao.VehicleNotFoundException;
 import lab1.model.Vehicle;
+import lab1.model.VehicleValidator;
 
 import javax.ejb.EJB;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Path("vehicle")
@@ -36,33 +40,60 @@ public class CrudService {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Vehicle getById(@PathParam("id") long id) {
-        return vehicleDao.getById(id);
+    public Response getById(@PathParam("id") long id) {
+        try {
+            Vehicle vehicle =  vehicleDao.getById(id);
+            return Response.ok(vehicle).build();
+        } catch (VehicleNotFoundException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+    private Vehicle validate(Vehicle vehicle) throws ValidationException {
+        return new VehicleValidator(vehicle).getValidatedVehicle();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    public void create(Vehicle vehicle) {
+    public Response create(Vehicle vehicle) {
+        Vehicle validatedVehicle;
+        try {
+            validatedVehicle = validate(vehicle);
+        } catch (ValidationException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+        validatedVehicle.setCreationDate(LocalDateTime.now().truncatedTo(ChronoUnit.DAYS));
         vehicleDao.create(vehicle);
+        return Response.ok().build();
     }
 
     @PUT
     @Path("{id}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void update(@PathParam("id") long id, Vehicle vehicle) {
+    public Response update(@PathParam("id") long id, Vehicle vehicle) {
         Vehicle validatedVehicle;
         try {
-            validatedVehicle = new ValidatedVehicle(vehicle).getValidatedVehicle();
+            validatedVehicle = validate(vehicle);
         } catch (ValidationException e) {
-            throw new BadRequestException(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
         validatedVehicle.setId(id);
-        vehicleDao.update(validatedVehicle);
+        try {
+            vehicleDao.update(validatedVehicle);
+        } catch (VehicleNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+        return Response.ok().build();
     }
 
     @DELETE
     @Path("{id}")
-    public void delete(@PathParam("id") long id) {
-        vehicleDao.delete(id);
+    public Response delete(@PathParam("id") long id) {
+        try {
+            vehicleDao.delete(id);
+        } catch (VehicleNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+        return Response.ok().build();
     }
 }
