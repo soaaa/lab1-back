@@ -15,7 +15,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -108,17 +107,13 @@ public class VehicleDao {
         return typedQuery.getResultList();
     }
 
-    private void throwNotFound(long vehicleId) {
-        throw new NotFoundException("Vehicle with id " + vehicleId + " not found");
-    }
-
-    public Vehicle getById(long id) {
+    public Vehicle getById(long id) throws VehicleNotFoundException {
         EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
         Vehicle vehicle = entityManager.find(Vehicle.class, id);
         if (vehicle == null) {
             transaction.rollback();
-            throwNotFound(id);
+            throw new VehicleNotFoundException(id);
         }
         return vehicle;
     }
@@ -144,25 +139,27 @@ public class VehicleDao {
         transaction.commit();
     }
 
-    public void update(Vehicle vehicle) {
+    public void update(Vehicle vehicle) throws VehicleNotFoundException {
         long id = vehicle.getId();
         EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
-        if (entityManager.find(Vehicle.class, id) == null) {
+        Vehicle storedVehicle = entityManager.find(Vehicle.class, id);
+        if (storedVehicle == null) {
             transaction.rollback();
-            throwNotFound(id);
+            throw new VehicleNotFoundException(id);
         }
+        vehicle.setCreationDate(storedVehicle.getCreationDate());
         entityManager.merge(vehicle);
         transaction.commit();
     }
 
-    public void delete(long id) {
+    public void delete(long id) throws VehicleNotFoundException {
         EntityTransaction transaction = entityManager.getTransaction();
         transaction.begin();
         Vehicle vehicle = entityManager.find(Vehicle.class, id);
         if (vehicle == null) {
             transaction.rollback();
-            throwNotFound(id);
+            throw new VehicleNotFoundException(id);
         }
         entityManager.remove(vehicle);
         transaction.commit();
