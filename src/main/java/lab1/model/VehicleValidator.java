@@ -2,11 +2,11 @@ package lab1.model;
 
 import lab1.ValidationException;
 
-public class ValidatedVehicle {
+public class VehicleValidator {
 
     private final Vehicle vehicle;
 
-    public ValidatedVehicle(Vehicle vehicle) {
+    public VehicleValidator(Vehicle vehicle) {
         this.vehicle = vehicle;
     }
 
