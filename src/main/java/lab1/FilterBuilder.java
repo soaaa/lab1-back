@@ -61,8 +61,9 @@ public class FilterBuilder {
                                        String columnName,
                                        String value) throws InvalidFilterException {
         if (value == null) return this;
+        String uppercaseValue = value.toUpperCase();
         for (Enum<?> enumValue : enumValues) {
-            if (value.equals(enumValue.name())) {
+            if (uppercaseValue.equals(enumValue.name())) {
                 addPredicate(columnName, enumValue);
                 return this;
             }
