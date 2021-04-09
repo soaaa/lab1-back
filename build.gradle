@@ -15,8 +15,6 @@ dependencies {
     providedCompile "javax:javaee-api:8.0"
 
     compile "org.eclipse.persistence:eclipselink:2.7.7"
-
-    compile "com.google.code.gson:gson:2.8.6"
 }
 
 war {
